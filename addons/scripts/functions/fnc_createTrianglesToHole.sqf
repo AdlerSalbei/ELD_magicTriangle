@@ -1,4 +1,53 @@
 #include "script_component.hpp"
+/*
+ * Author: EL_D148L0
+ * fill the area around a trench up to the provided outer border with fillers
+ *
+ * Arguments:
+ * 0: borderLines of the trench. positions in format PositionASL <ARRAY>
+ * 1: list of lines that form the outer border of the hole. positions in format PositionASL <ARRAY>
+ * 2: list of trenchFillingTriangles. positions in format PositionASL <ARRAY>
+ *
+ * Return Value:
+ * Array of positions (ASL) and filler objects.<ARRAY>
+ *		each element of this array is an array of the following structure: [[<ARRAY>, <ARRAY>, <ARRAY>], <OBJECT>]. 
+ *
+ * Example:
+ *	[[
+		[[1992.79,5574.74,5.89199],[1994.45,5573.92,5.89613]],
+		[[1994.45,5573.92,5.89613],[1995.06,5570.57,5.89764]],
+		[[1993.85,5568.91,5.89462],[1995.06,5570.57,5.89764]],
+		[[1992.13,5569.88,5.89032],[1993.85,5568.91,5.89462]],
+		[[1991.43,5573.21,5.88856],[1992.13,5569.88,5.89032]],
+		[[1991.43,5573.21,5.88856],[1992.79,5574.74,5.89199]]
+	],[
+		[[1996,5580,5.91],[2000,5576,5.91]],
+		[[1992,5580,5.9],[1996,5580,5.91]],
+		[[2000,5568,5.9],[2000,5572,5.91]],
+		[[2000,5572,5.91],[2000,5576,5.91]],
+		[[1996,5564,5.89],[2000,5568,5.9]],
+		[[1992,5564,5.91],[1996,5564,5.89]],
+		[[1988,5568,5.89],[1992,5564,5.91]],
+		[[1988,5568,5.89],[1988,5572,5.89]],
+		[[1988,5572,5.89],[1988,5576,5.89]],
+		[[1988,5576,5.89],[1992,5580,5.9]],
+		[[2000,5564,5.9],[2000,5568,5.9]],
+		[[1996,5564,5.89],[2000,5564,5.9]],
+		[[1988,5580,5.89],[1992,5580,5.9]],
+		[[1988,5576,5.89],[1988,5580,5.89]]
+	],[
+		[[1992.79,5574.74,5.89199],[1994.45,5573.92,5.89613],[1995.06,5570.57,5.89764]],
+		[[1992.79,5574.74,5.89199],[1995.06,5570.57,5.89764],[1993.85,5568.91,5.89462]],
+		[[1992.79,5574.74,5.89199],[1993.85,5568.91,5.89462],[1992.13,5569.88,5.89032]],
+		[[1992.79,5574.74,5.89199],[1992.13,5569.88,5.89032],[1991.43,5573.21,5.88856]]
+	]] call ELD_magicTriangle_scripts_fnc_createTrianglesToHole;
+ *
+ * Public: No
+ */
+
+
+
+
 
 //TODO remove z coordinate from point comparisons when it's not needed
 
@@ -40,9 +89,9 @@ private _count = 0;
 
 
 
-g = 0;
-l = 0;
-h = 0;
+// g = 0;
+// l = 0;
+// h = 0;
 
 
 
@@ -54,7 +103,7 @@ private _possibleStartSides = [];
 {
 	private _thisBL = _x;
 	private _extraPoint = [];
-	_found = false;
+	private _found = false;
 	{
 		private _thisTFT = _x;
 		private _sides = [[_thisTFT # 0, _thisTFT # 1], [_thisTFT # 1, _thisTFT # 2], [_thisTFT # 2, _thisTFT # 0]];
@@ -97,8 +146,8 @@ private _trenchPoints = [];
 
 
 
-TestTriangle = [];
-startTime = diag_tickTime;
+// TestTriangle = [];
+GVAR(startTime) = diag_tickTime;
 
 while {_running} do {
 	
@@ -107,8 +156,8 @@ while {_running} do {
 	_possibleStartSides = [];
 	{
 		_i = _x;
-		_cnt = {_i isEqualTo _x} count _usedSides;
-		if (_cnt == 1) then {
+		_count = {_i isEqualTo _x} count _usedSides;
+		if (_count == 1) then {
 			_possibleStartSides append [_i];
 		};
 	} foreach _usedSides;
@@ -126,10 +175,10 @@ while {_running} do {
 		private _extraPoint = _thisPSS # 1;
 		{
 			//timing thing
-			g = g + 1;
-			if (g == 10) then {
-				TestTriangle = [_x, _extraPoint, _line #0, _line #1];
-			};
+			// g = g + 1;
+			// if (g == 10) then {
+			// 	TestTriangle = [_x, _extraPoint, _line #0, _line #1];
+			// };
 			
 			//first check, does it go backwards into what it came from?
 			if ([_x, _extraPoint, _line #0, _line #1] call FUNC(sameSide)) then { 
@@ -152,8 +201,8 @@ while {_running} do {
 			
 			{ // compare with other used sides and sides consisting of two times the same point
 				private _i = _x;
-				_cnt = {_i isEqualTo _x} count _usedSides;
-				if (_cnt > 1 || (_i # 0) isEqualTo (_i # 1)) then {
+				private _count2 = {_i isEqualTo _x} count _usedSides; // there is another _count a layer higher
+				if (_count2 > 1 || (_i # 0) isEqualTo (_i # 1)) then {
 					_allowed = false;
 					break;
 				};
@@ -165,14 +214,14 @@ while {_running} do {
 			
 			
 			// check if triangle is extremely flat
-			_sa = (_thisPT # 0) distance2D (_thisPT # 1); 
-			_sb = (_thisPT # 1) distance2D (_thisPT # 2); 
-			_sc = (_thisPT # 2) distance2D (_thisPT # 0);
+			private _sa = (_thisPT # 0) distance2D (_thisPT # 1); 
+			private _sb = (_thisPT # 1) distance2D (_thisPT # 2); 
+			private _sc = (_thisPT # 2) distance2D (_thisPT # 0);
 			/*if ((_sb == 0) || (_sc == 0)) then { //checking this because once i got an error zero divisor on the angle calculation -- probably fixed, removing this code
 				_allowed = false;
 				continue;
 			};*/
-			_angle1 = acos (((_sb ^ 2) + (_sc ^ 2) - (_sa ^ 2)) / (2 * _sb * _sc));
+			private _angle1 = acos (((_sb ^ 2) + (_sc ^ 2) - (_sa ^ 2)) / (2 * _sb * _sc));
 			if (_angle1 < 3 || _angle1 > 177) then {
 				_allowed = false;
 				continue;
@@ -224,7 +273,7 @@ while {_running} do {
 			private _p2 = [(_thisPT # 0 # 0 + _thisPT # 2 # 0)/2, (_thisPT # 0 # 1 + _thisPT # 2 # 1)/2];
 			private _p3 = [(_thisPT # 0 # 0 + _thisPT # 1 # 0)/2, (_thisPT # 0 # 1 + _thisPT # 1 # 1)/2];
 			{
-				_x2d = [_x # 0, _x # 1];
+				private _x2d = [_x # 0, _x # 1];
 				if ((_p1 isEqualTo _x2d) || (_p2 isEqualTo _x2d) || (_p3 isEqualTo _x2d)) then {
 					_allowed = false;
 					
@@ -238,12 +287,12 @@ while {_running} do {
 			};
 			
 			{ //check if triangle intersects any other triangle (overused and probably expensive)
-				l = l + 1;
+				// l = l + 1;
 					
 				if ((([_x # 0, _extraPoint, _line #0, _line #1] call FUNC(sameSide)) && {[_x # 1, _extraPoint, _line #0, _line #1] call FUNC(sameSide)}) && {[_x # 2, _extraPoint, _line #0, _line #1] call FUNC(sameSide)}) then { 
 					continue;
 				};
-				h = h + 1;
+				// h = h + 1;
 				
 				if ([_thisPT, _x] call FUNC(triangleIntersect)) then {
 					_allowed = false;
@@ -276,20 +325,20 @@ while {_running} do {
 			private _sa = (_x # 0) distance2D (_x # 1);
 			private _sb = (_x # 1) distance2D (_x # 2);
 			private _sc = (_x # 2) distance2D (_x # 0);
-			selectMin [acos (((_sb ^ 2) + (_sc ^ 2) - (_sa ^ 2)) / (2 * _sb * _sc)), acos (((_sa ^ 2) + (_sc ^ 2) - (_sb ^ 2)) / (2 * _sa * _sc)), acos (((_sa ^ 2) + (_sb ^ 2) - (_sc ^ 2)) / (2 * _sa * _sb))]
+			selectMin [acos (((_sb ^ 2) + (_sc ^ 2) - (_sa ^ 2)) / (2 * _sb * _sc)), acos (((_sa ^ 2) + (_sc ^ 2) - (_sb ^ 2)) / (2 * _sa * _sc)), acos (((_sa ^ 2) + (_sb ^ 2) - (_sc ^ 2)) / (2 * _sa * _sb))];
 		}, "DESCEND"] call BIS_fnc_sortBy;
 		
 		
-		_finaltriangle = _possibleTrianglesSorted # 0;
+		private _finaltriangle = _possibleTrianglesSorted # 0;
 		//_finaltrianglestill in format [_line #0, _line #1, thirdpoint];
 		
-		_sides = [[_finalTriangle # 0, _finalTriangle # 1], [_finalTriangle # 1, _finalTriangle # 2], [_finalTriangle # 2, _finalTriangle # 0]];
+		private _sides = [[_finalTriangle # 0, _finalTriangle # 1], [_finalTriangle # 1, _finalTriangle # 2], [_finalTriangle # 2, _finalTriangle # 0]];
 		{_x sort true} foreach _sides;
-		_sn0 = [_finalTriangle # 1, _finalTriangle # 2];
+		private _sn0 = [_finalTriangle # 1, _finalTriangle # 2];
 		_sn0 sort true;
-		_sn1 = [_finalTriangle # 0, _finalTriangle # 2];
+		private _sn1 = [_finalTriangle # 0, _finalTriangle # 2];
 		_sn1 sort true;
-		_sn2 = [_finalTriangle # 1, _finalTriangle # 0];
+		private _sn2 = [_finalTriangle # 1, _finalTriangle # 0];
 		_sn2 sort true;
 		
 		if (!(_sn0 in _usedSides)) then {
@@ -325,8 +374,8 @@ while {_running} do {
 	_possibleStartSides = [];
 	{
 		_i = _x;
-		_cnt = {_i isEqualTo _x} count _usedSides;
-		if (_cnt == 1) then {
+		_count = {_i isEqualTo _x} count _usedSides;
+		if (_count == 1) then {
 			_possibleStartSides append [_i];
 		};
 	} foreach _usedSides;
@@ -342,7 +391,7 @@ while {_running} do {
 	if (_count == 6) exitwith {msg = "triangle creation ended with possible sides left"};
 };
 
-endTime = diag_tickTime;
+GVAR(endTime) = diag_tickTime;
 
 
 
@@ -350,15 +399,15 @@ endTime = diag_tickTime;
 
 
 
-triangles = _triangles;
-d = [];
+// triangles = _triangles;
+// d = [];
 
 private _trianglesPositionsAndObjects = [];
 
 {
-	_obj = _x call FUNC(createTriangle);
+	private _obj = _x call FUNC(createTriangle);
 	_obj setObjectTextureGlobal [0, surfaceTexture getpos _obj];
-	d append [_obj];
+	// d append [_obj];
 	_trianglesPositionsAndObjects append [[_x, _obj]]
 } foreach _triangles;
 

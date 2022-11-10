@@ -1,15 +1,33 @@
+#include "script_component.hpp"
+/*
+ * Author: EL_D148L0
+ * get the borders of a hole that is made by lowering the passed points.
+ *
+ * Arguments:
+ * 0: array of positions of lowered points in format Position2d <ARRAY>
+ *
+ * Return Value:
+ * Array of lines <ARRAY>
+ * 		each element of this array is an array of the following structure: [<ARRAY>, <ARRAY>] 
+ * 			each element of this array is an array in format PositionASL
+ *
+ * Example:
+ * [[[1996,5564],[2000,5564]]] call ELD_magicTriangle_scripts_fnc_getTerrainLines;
+ *
+ * Public: No
+ */
 
 params ["_points"];
 // points come in as 2d points
 
-_pointsComp = + _points;
+private _pointsComp = + _points;
 for "_i" from 0 to ((count _pointsComp) - 1) do {(_pointsComp # _i) deleteAt 2;};
 
-_cellsize = getTerrainInfo#2;
+private _cellsize = getTerrainInfo#2;
 
-_borderpoints = [];
+private _borderpoints = [];
 {	
-	_tests = [[_x # 0, _x # 1 + _cellsize], [_x # 0 + _cellsize, _x # 1], [_x # 0 + _cellsize, _x # 1 - _cellsize], [_x # 0, _x # 1 - _cellsize], [_x # 0 - _cellsize, _x # 1], [_x # 0 - _cellsize, _x # 1 + _cellsize]];
+	private _tests = [[_x # 0, _x # 1 + _cellsize], [_x # 0 + _cellsize, _x # 1], [_x # 0 + _cellsize, _x # 1 - _cellsize], [_x # 0, _x # 1 - _cellsize], [_x # 0 - _cellsize, _x # 1], [_x # 0 - _cellsize, _x # 1 + _cellsize]];
 	{
 		//{
 		//	
@@ -21,21 +39,20 @@ _borderpoints = [];
 	
 } foreach _points;
 
-f = + _borderpoints;
-s = + _points;
+// f = + _borderpoints;
+// s = + _points;
 
 //_borderpoints = _borderpoints - _points;
 
-#include "script_component.hpp"
-_borderLines = [];
-_borderpointsCompare = + _borderpoints;
+private _borderLines = [];
+private _borderpointsCompare = + _borderpoints;
 {	
-	_thisBP = _x;
-	_heightThis = getTerrainHeight _x;
-	_tests = [[_x # 0, _x # 1 + _cellsize], [_x # 0 + _cellsize, _x # 1], [_x # 0 + _cellsize, _x # 1 - _cellsize], [_x # 0, _x # 1 - _cellsize], [_x # 0 - _cellsize, _x # 1], [_x # 0 - _cellsize, _x # 1 + _cellsize]];
+	private _thisBP = _x;
+	private _heightThis = getTerrainHeight _x;
+	private _tests = [[_x # 0, _x # 1 + _cellsize], [_x # 0 + _cellsize, _x # 1], [_x # 0 + _cellsize, _x # 1 - _cellsize], [_x # 0, _x # 1 - _cellsize], [_x # 0 - _cellsize, _x # 1], [_x # 0 - _cellsize, _x # 1 + _cellsize]];
 	{
 		if ((_x in _borderpointsCompare)) then {
-			_height = getTerrainHeight _x;
+			private _height = getTerrainHeight _x;
 			_borderLines pushback [(_x + [_height]), (_thisBP + [_heightThis])];
 		};
 	} foreach _tests;
