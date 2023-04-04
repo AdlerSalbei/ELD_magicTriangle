@@ -4,13 +4,12 @@ keys/*
 .hemtt/local
 /a3/
 /x/
-
+CBA_A3/*
 *.pbo
 *.cache
 *.biprivatekey
 *.blend
 *.blend1
-*.p3d
 *.rtm
 *.ogg
 *.wss
