@@ -2,7 +2,6 @@
 class CfgVehicles
 {
 	class Rocks_base_F;
-
 	class Trench_base: Rocks_base_F
 	{
 		autocenter = false;
@@ -25,7 +24,7 @@ class CfgVehicles
 				// Entity is passed as _this, value is passed as _value
 				// %s is replaced by attribute config name. It can be used only once in the expression
 				// In MP scenario, the expression is called only on server.
-				expression = "_this setVariable ['rank',_value]; _value call ELD_magicTriangle_scripts_fnc_discoverRank";
+				expression = "_this setVariable ['rank',_value];";
 
 				// Expression called when custom property is undefined yet (i.e., when setting the attribute for the first time)
 				// Entity (unit, group, marker, comment etc.) is passed as _this
@@ -48,7 +47,7 @@ class CfgVehicles
 
 				expression = "_this setVariable ['%s',_value];";
 
-				defaultValue = "[]";
+				defaultValue = "str ((getArray ((configOf _trench) >> 'trench_sides_open')) apply {[-1, -1]})";
 
 				//--- Optional properties
 				unique = 0; // When 1, only one entity of the type can have the value in the mission (used for example for variable names or player control)
@@ -58,7 +57,10 @@ class CfgVehicles
 		
 		class EventHandlers;
 		class EventHandlers: EventHandlers {
-			init = "";
+			init = "diag_log 'trench init'; _this call (uiNamespace getVariable 'ELD_magicTriangle_scripts_fnc_initTrench');";
+			dragged3DEN = "_this call ELD_magicTriangle_scripts_fnc_3DENUpdateTrench;";
+			unregisteredFromWorld3DEN = "_this call ELD_magicTriangle_scripts_fnc_3DENUnregisterTrench;";
+			registeredToWorld3DEN = "_this call ELD_magicTriangle_scripts_fnc_3DENReregisterTrench";
 		};
 
 		

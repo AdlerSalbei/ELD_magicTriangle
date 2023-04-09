@@ -43,7 +43,19 @@ while {true} do {
 	if (_usingList) then {
 		(_currentTrench getVariable "visitedCorners") set [_currentCornerIndex, true];
 	};
-	private _nextTrench = ((_currentTrench getVariable "sides") # _currentCornerIndex);
+	//temp debug thing start
+	try {
+		//_trench getVariable "sides"
+		if ((_currentTrench getVariable "sides") isEqualTo []) throw "adasd";
+	} catch {
+		// this stays to prevent hang
+		diag_log (_currentTrench getVariable 'sides');
+		diag_log (_currentTrench);
+		diag_log ("uninitialized sides in trench in getTrenchPolygon");
+		break;
+	};
+	//temp debug thing end
+	private _nextTrench = ((_currentTrench getVariable "sides") # _currentCornerIndex # 0);
 	private _continueSameTrench = (isnull _nextTrench) || {_usingList && {!(_nextTrench in _trenchList)}}; 
 	if (_continueSameTrench) then {
 		if (_reachedStart) then {
@@ -56,7 +68,7 @@ while {true} do {
 			_reachedStart = true;
 		};
 	} else {
-		private _nextIndex = (((_nextTrench getVariable "sides") find _currentTrench) + 1) % (count (_nextTrench getVariable "sides"));
+		private _nextIndex = (((_currentTrench getVariable "sides") # _currentCornerIndex # 1) + 1) % (count (_nextTrench getVariable "sides"));
 		if (_currentCornerRank > (_nextTrench getVariable "rank")) then {
 			_polygon set [-1, (_nextTrench getVariable "corners") # _nextIndex];
 			_currentCornerRank = (_nextTrench getVariable "rank");
