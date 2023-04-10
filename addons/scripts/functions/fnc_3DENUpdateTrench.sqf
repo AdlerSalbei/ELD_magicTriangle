@@ -4,6 +4,7 @@
  * function that is called inside the dragged3den EH by trenches
  * Arguments:
  * 0: trench to update
+ * 1: whether to update saved data and TOP aswell (optional, default false)
  *
  * Return Value:
  * none
@@ -15,7 +16,8 @@
  */
 
 
-params ["_trench"];
+params ["_trench", ["_updateTP", false]];
+if (GVAR(initState) != INITIALISED_3DEN) exitWith {};
 {
 	if (!isNull _x) then {
 		private _posInfo = [_trench, _forEachIndex] call FUNC(getBorderPosDirUp);
@@ -57,7 +59,6 @@ params ["_trench"];
 			if (!isNull (_oldMatingInfo#0)) then {
 				((_oldMatingInfo#0) getVariable "sides") set [_oldMatingInfo#1, [objNull, -1]];
 				(((_oldMatingInfo#0) getVariable "arrows") # (_oldMatingInfo#1)) setObjectTexture [0, "#(argb,8,8,3)color(1,0,0,0.75,ca)"];
-				[(_oldMatingInfo#0)] call FUNC(3DENUpdateAttributes);
 			};
 			if (isNull _mate) then {
 				_originArrow setObjectTexture [0, "#(argb,8,8,3)color(1,0,0,0.75,ca)"];
@@ -69,15 +70,15 @@ params ["_trench"];
 
 				(_trench getVariable "sides") set [_originArrow getVariable "sideNumber", [_mate getVariable "trench", _mate getVariable "sideNumber"]];
 				((_mate getVariable "trench") getVariable "sides") set [(_mate getVariable "sideNumber"), [_trench, _originArrow getVariable "sideNumber"]];
-				[(_mate getVariable "trench")] call FUNC(3DENUpdateAttributes);
 			};
-			[_trench] call FUNC(3DENUpdateAttributes);
 		};
 	};
 } forEach (_trench getVariable ["arrows", []]);
 
-
-if (current3DENOperation isEqualTo "") then {
+//diag_log current3DENOperation;
+if (current3DENOperation isEqualTo "" && _updateTP) then {
+	
 	private _tp = [_trench] call FUNC(registerTrenchPosition);
 	[_tp] call FUNC(TPUpdate);
+	call FUNC(3DENUpdateData);
 };
